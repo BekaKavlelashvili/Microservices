@@ -8,3 +8,5 @@
 /Carsties/.vs
 /Carsties/src/SearchService/obj
 /Carsties/src/SearchService/bin/Debug/net7.0
+/Carsties/src/Contracts/obj
+/Carsties/src/Contracts/bin/Debug/net7.0
