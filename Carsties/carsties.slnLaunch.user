@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "src\\AuctionService\\AuctionService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\SearchService\\SearchService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\Contracts\\Contracts.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\IdentityService\\IdentityService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\GatewayService\\GatewayService.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
