@@ -12,3 +12,5 @@
 /Carsties/src/Contracts/bin/Debug/net7.0
 /Carsties/src/IdentityService/obj
 /Carsties/src/IdentityService/bin/Debug/net7.0
+/Carsties/src/GatewayService/obj
+/Carsties/src/GatewayService/bin/Debug/net7.0
