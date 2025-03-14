@@ -39,7 +39,7 @@ const render = ({
       {completed ? (
         <span>Auction finished</span>
       ) : (
-        <span suppressContentEditableWarning={true}>
+        <span suppressHydrationWarning={true}>
           {zeroPad(days)}:{zeroPad(hours)}:{zeroPad(minutes)}:{zeroPad(seconds)}
         </span>
       )}
