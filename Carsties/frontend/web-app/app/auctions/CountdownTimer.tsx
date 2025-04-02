@@ -48,9 +48,11 @@ const render = ({
 };
 
 export default function CountdownTimer({ auctionEnd }: Props) {
+  const endDate = new Date(auctionEnd);
+
   return (
     <div>
-      <Countdown date={auctionEnd} renderer={render} />
+      <Countdown date={endDate} renderer={render} />
     </div>
   );
 }
