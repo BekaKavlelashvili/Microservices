@@ -23,6 +23,8 @@ export default function Listings() {
       searchTerm: state.searchTerm,
       orderBy: state.orderBy,
       filterBy: state.filterBy,
+      seller: state.seller,
+      winner: state.winner,
     }))
   );
 
@@ -41,7 +43,7 @@ export default function Listings() {
 
   if (!data) return <h3>Loading...</h3>;
 
-  if (data.totalCount === 0) return <EmptyFilter showResult />;
+  if (data.totalCount === 0) return <EmptyFilter showReset />;
 
   return (
     <>
