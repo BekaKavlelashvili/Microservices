@@ -1,4 +1,5 @@
 using System.Net;
+using Contracts;
 using MassTransit;
 using Polly;
 using Polly.Extensions.Http;
@@ -8,6 +9,7 @@ using SearchService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine(typeof(AuctionCreated).AssemblyQualifiedName);
 // Add services to the container.
 
 builder.Services.AddControllers();

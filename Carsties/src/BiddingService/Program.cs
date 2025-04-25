@@ -1,39 +1,26 @@
-using AuctionService.Consumers;
-using AuctionService.Data;
-using AuctionService.Services;
+using BiddingService.Consumers;
+using BiddingService.Services;
 using Contracts;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using MongoDB.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Logging
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole(); // or any other provider
-
+builder.Logging.AddConsole();
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-builder.Services.AddDbContext<AuctionDbContext>(opt =>
-{
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+// Configure MassTransit with RabbitMQ
 builder.Services.AddMassTransit(x =>
 {
-    x.AddEntityFrameworkOutbox<AuctionDbContext>(o =>
-    {
-        o.QueryDelay = TimeSpan.FromSeconds(10);
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
 
-        o.UsePostgres();
-        o.UseBusOutbox();
-    });
-
-    x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
-
-    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("auction", false));
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("bids", false));
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -43,10 +30,18 @@ builder.Services.AddMassTransit(x =>
             host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
         });
 
+        cfg.ReceiveEndpoint("bids-auction-created", e =>
+        {
+            e.UseMessageRetry(r => r.Interval(5, 5));
+
+            e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+        });
+
         cfg.ConfigureEndpoints(context);
     });
 });
 
+// Configure JWT authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -56,27 +51,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters.NameClaimType = "username";
     });
 
-builder.Services.AddGrpc();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddHostedService<CheckAuctionFinished>();
+builder.Services.AddScoped<GrpcAuctionClient>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-app.MapGrpcService<GrpcAuctionService>();
 
-try
-{
-    DbInitializer.InitDb(app);
-}
-catch (Exception e)
-{
-    Console.WriteLine(e);
-}
+// Initialize MongoDB
+
+await DB.InitAsync(
+    "BidDb",
+    MongoClientSettings.FromConnectionString(
+        builder.Configuration.GetConnectionString("BidDbConnection")
+    )
+);
 
 LogContext.ConfigureCurrentLogContext(app.Services.GetRequiredService<ILoggerFactory>());
-
 
 app.Run();
